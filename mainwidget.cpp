@@ -56,6 +56,94 @@ MainWidget::MainWidget(QWidget *parent) :
 
 }
 
+void MainWidget::getPathFileToRead()
+{
+    this->fileToRead = QFileDialog::getOpenFileName(this,tr("Open SessionStore"), QDir::toNativeSeparators(QDir::homePath() + "/.mozilla/firefox/"), tr("sessionstore file (*.js *.bak)"));
+    this->lineFiletodecode->setText(this->fileToRead);
+}
+
+void MainWidget::getPathFileToWrite()
+{
+    this->fileToWrite= QFileDialog::getSaveFileName(this,tr("Save extracted website"), QDir::toNativeSeparators(QDir::homePath()), tr("Extracted Websites (*)"));
+    this->lineWriteFile->setText(this->fileToWrite);
+}
+
+void MainWidget::processFile()
+{
+    //creating the file and opening it
+    QFile fileReaded(fileToRead);
+
+    if (!fileReaded.open(QIODevice::ReadOnly | QIODevice::Text))
+    {   //if the open fail we signal it and quit the method
+        QMessageBox msgBoxErrorOpening;
+        msgBoxErrorOpening.setIcon(QMessageBox::Warning);
+        msgBoxErrorOpening.setText("There was an error while openning the file to scan. \nPlease check if the path is valid \nSorry :(");
+        msgBoxErrorOpening.exec();
+        return;
+    }
+    //we prepare the stream to read
+    QTextStream in(&fileReaded);
+
+    QFile fileWrited(fileToWrite);
+    if(!fileWrited.open(QIODevice::WriteOnly | QIODevice::Text))
+    {   //if the open fail we signal it and quit the method
+        QMessageBox msgBoxErrorSaving;
+        msgBoxErrorSaving.setText("There was an error while trying to create the file for exporting the result. \nPlease check an output file is selected and if you can write it\nSorry :(");
+        msgBoxErrorSaving.exec();
+        fileReaded.close();
+        return;
+    }
+    //we prepare the stream to write
+    QTextStream out(&fileWrited);
+
+    //we set the codec of the opened file
+    in.setCodec("UTF-8");
+
+    /*will be used for the progress bar*/
+    qint64 maxPos = fileReaded.size();
+    //to avoid calculating each time we meet the if inside the while we do it now
+    qint64 firstPos = maxPos/4;
+    qint64 secondPos = maxPos/2;
+    qint64 thirdPos = firstPos+secondPos;
+    qint64 actualPos=0;
+    progressBar->setMaximum(maxPos); //adjust the bar
+
+    QString line;
+    while (!in.atEnd())
+    {
+
+        //we try to find an url and store it in the new file
+        line = in.read(1);
+        if(
+            (line=="\"") &&
+                ((line = in.read(1))=="u") &&
+                    ((line = in.read(1))=="r") &&
+                        ((line = in.read(1))=="l") &&
+                            ((line = in.read(1))=="\"") &&
+                                ((line = in.read(1))==":") &&
+                                    ((line = in.read(1))=="\"")
+                                        )
+        {
+          while((line = in.read(1))!="\"")
+              out << line;
+          out << "\n";
+        }
+
+        //because in the documentation of in.pos(); we learn that : " this function may have to seek the device to reconstruct a valid device position. This operation can be expensive"
+        //we actually count ourself
+        actualPos++;
+        if(actualPos==firstPos)
+            progressBar->setValue(actualPos);
+        if(actualPos==secondPos)
+            progressBar->setValue(actualPos);
+        if(actualPos==thirdPos)
+            progressBar->setValue(actualPos);
+    }
+    progressBar->setValue(progressBar->maximum());
+    fileReaded.close();
+    fileWrited.close();
+}
+
 MainWidget::~MainWidget()
 {
     //delete ui;
