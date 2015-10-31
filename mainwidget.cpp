@@ -16,7 +16,7 @@ MainWidget::MainWidget(QWidget *parent) :
     lineFiletodecode = new QLineEdit();
     lineFiletodecode->setReadOnly(true);
     lineFiletodecode->setMinimumWidth(200);
-    //lineFiletodecode->setMaximumWidth(lineFiletodecode->maximumWidth()+lineFiletodecode->minimumWidth());
+
     QPushButton *findPathFileToDecode = new QPushButton(tr("Find the file"));
     connect(findPathFileToDecode,SIGNAL(clicked()),this,SLOT(getPathFileToRead()));
     generalLayout->addWidget(labelFileToDecode,0,0);
@@ -96,7 +96,7 @@ void MainWidget::processFile()
     //we prepare the stream to write
     QTextStream out(&fileWrited);
 
-    //we set the codec of the opened file
+    //we set the codec of the opened file (it must be UTF-8 as our venerable tool "file" say)
     in.setCodec("UTF-8");
 
     /*will be used for the progress bar*/
