@@ -58,13 +58,13 @@ MainWidget::MainWidget(QWidget *parent) :
 
 void MainWidget::getPathFileToRead()
 {
-    this->fileToRead = QFileDialog::getOpenFileName(this,tr("Open SessionStore"), QDir::toNativeSeparators(QDir::homePath() + "/.mozilla/firefox/"), tr("sessionstore file (*.js *.bak)"));
+    this->fileToRead = QFileDialog::getOpenFileName(this,tr("Open SessionStore"), QDir::toNativeSeparators(QDir::homePath() + "/.mozilla/firefox/"), tr("sessionstore file (*.js *.bak *.json)"));
     this->lineFiletodecode->setText(this->fileToRead);
 }
 
 void MainWidget::getPathFileToWrite()
 {
-    this->fileToWrite= QFileDialog::getSaveFileName(this,tr("Save extracted website"), QDir::toNativeSeparators(QDir::homePath()), tr("Extracted Websites (*)"));
+    this->fileToWrite= QFileDialog::getSaveFileName(this,tr("Save extracted website"), QDir::toNativeSeparators(QDir::homePath()), tr("Text file of extracted Websites (*)"));
     this->lineWriteFile->setText(this->fileToWrite);
 }
 
